@@ -4,10 +4,15 @@ import { replaceIdMiddleware } from '@blocksuite/affine/shared/adapters';
 import type { AffineTextAttributes } from '@blocksuite/affine/shared/types';
 import type { DeltaInsert } from '@blocksuite/affine/store';
 import { Slice, Text, Transformer } from '@blocksuite/affine/store';
-import { ObjectPool, Service } from '@toeverything/infra';
+import {
+  generateFractionalIndexingKeyBetween,
+  ObjectPool,
+  Service,
+} from '@toeverything/infra';
 import { combineLatest, map } from 'rxjs';
 
 import { initDocFromProps } from '../../../blocksuite/initialization';
+import type { WorkspaceDBService } from '../../db';
 import { getAFFiNEWorkspaceSchema } from '../../workspace/global-schema';
 import type { Doc } from '../entities/doc';
 import { DocRecordList } from '../entities/record-list';
@@ -89,7 +94,8 @@ export class DocsService extends Service {
   constructor(
     private readonly store: DocsStore,
     private readonly docPropertiesStore: DocPropertiesStore,
-    private readonly docCreateMiddlewares: DocCreateMiddleware[]
+    private readonly docCreateMiddlewares: DocCreateMiddleware[],
+    private readonly workspaceDBService: WorkspaceDBService
   ) {
     super();
   }
@@ -395,6 +401,45 @@ export class DocsService extends Service {
     });
     targetDoc.updateProperties(properties);
 
+    // duplicate doc tags
+    targetDoc.record.setMeta({
+      tags: sourceDoc.meta$.value.tags,
+    });
+
+    // duplicate doc folder links
+    this.copyFolderLinks(sourceDocId, targetDocId);
+
     return targetDocId;
+  }
+
+  private copyFolderLinks(sourceDocId: string, targetDocId: string) {
+    const sourceLinks = this.workspaceDBService.db.folders.find({
+      type: 'doc',
+      data: sourceDocId,
+    });
+    for (const link of sourceLinks) {
+      if (!link.parentId) continue;
+      const existing = this.workspaceDBService.db.folders.find({
+        parentId: link.parentId,
+        type: 'doc',
+        data: targetDocId,
+      });
+      if (existing.length > 0) continue;
+      const siblings = this.workspaceDBService.db.folders.find({
+        parentId: link.parentId,
+      });
+      let lastIndex: string | null = null;
+      for (const sibling of siblings) {
+        if (lastIndex === null || sibling.index > lastIndex) {
+          lastIndex = sibling.index;
+        }
+      }
+      this.workspaceDBService.db.folders.create({
+        parentId: link.parentId,
+        type: 'doc',
+        data: targetDocId,
+        index: generateFractionalIndexingKeyBetween(lastIndex, null),
+      });
+    }
   }
 }
