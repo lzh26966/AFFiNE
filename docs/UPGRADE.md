@@ -1,6 +1,7 @@
 # AFFiNE 自定义分支改动与升级维护指南（UPGRADE）
 
-> 基线：2026-10-22，`canary` 分支，commit `0b69a6d`，版本 `0.27.5`。当前仓库是 shallow clone，改动尚未提交。
+> 当前分支：`my/affine-custom`，基于 `fork/canary` `e32f8dc`，版本 `0.27.5`，shallow clone。
+> 原始基线：`0b69a6d`。功能提交已 cherry-pick 到最新 canary，并推送到 `https://github.com/lzh26966/AFFiNE/tree/my/affine-custom`。
 > 目标：保留 Folder 筛选器与模板复制能力，同时可持续合并 AFFiNE 官方更新。
 
 ## 1. 当前改动总览
