@@ -6,6 +6,7 @@ import {
   DateTimeIcon,
   EdgelessIcon,
   FavoriteIcon,
+  FolderIcon,
   HistoryIcon,
   IntegrationsIcon,
   LongerIcon,
@@ -37,6 +38,7 @@ import {
   EdgelessThemeGroupHeader,
 } from './edgeless-theme';
 import { FavoriteFilterValue } from './favorite';
+import { FolderFilterValue } from './folder';
 import {
   IntegrationTypeDocListProperty,
   IntegrationTypeFilterValue,
@@ -79,6 +81,18 @@ export const SystemPropertyTypes = {
     showInDocList: 'stack',
     docListProperty: TagsDocListProperty,
     groupHeader: TagsGroupHeader,
+  },
+  folder: {
+    icon: FolderIcon,
+    name: 'com.affine.filter.folder',
+    filterMethod: {
+      is: 'com.affine.editCollection.rules.include.is',
+      'is-not': 'com.affine.editCollection.rules.include.is-not',
+      'is-empty': 'com.affine.filter.is empty',
+      'is-not-empty': 'com.affine.filter.is not empty',
+    },
+    filterValue: FolderFilterValue,
+    defaultFilter: { method: 'is', value: '' },
   },
   createdBy: {
     icon: MemberIcon,

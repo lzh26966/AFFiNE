@@ -1,5 +1,6 @@
 import type { Framework } from '@toeverything/infra';
 
+import { WorkspaceDBService } from '../db';
 import { DocsService } from '../doc';
 import { DocsSearchService } from '../docs-search';
 import { FavoriteService } from '../favorite';
@@ -15,6 +16,7 @@ import { DocPrimaryModeFilterProvider } from './impls/filters/doc-primary-mode';
 import { EdgelessThemeFilterProvider } from './impls/filters/edgeless-theme';
 import { EmptyJournalFilterProvider } from './impls/filters/empty-journal';
 import { FavoriteFilterProvider } from './impls/filters/favorite';
+import { FolderFilterProvider } from './impls/filters/folder';
 import { IntegrationTypeFilterProvider } from './impls/filters/integration-type';
 import { JournalFilterProvider } from './impls/filters/journal';
 import { NumberPropertyFilterProvider } from './impls/filters/number';
@@ -145,6 +147,10 @@ export function configureCollectionRulesModule(framework: Framework) {
     ])
     .impl(FilterProvider('system:favorite'), FavoriteFilterProvider, [
       FavoriteService,
+      DocsService,
+    ])
+    .impl(FilterProvider('system:folder'), FolderFilterProvider, [
+      WorkspaceDBService,
       DocsService,
     ])
     .impl(FilterProvider('system:shared'), SharedFilterProvider, [
